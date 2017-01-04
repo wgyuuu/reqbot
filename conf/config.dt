@@ -7,8 +7,8 @@
     token => " testing "
     [PARAMS]
     msg => test config
-    id  => `
-        func Get(n int) (list []int) { // n 第几次request
+    id  => ` // n 第几次request
+        func Get(n int) (list []int) { // 返回的结果如果是非数字或字符串 就会被json
             for i := 0; i < n; i++ {
                 list = append(list, i)
             }
