@@ -1,0 +1,26 @@
+{
+    [URL]
+    http://127.0.0.1:8000/test/1
+    [METHOD]
+    post
+    [HEADER]
+    token => " testing "
+    [PARAMS]
+    msg => test config
+    id  => `
+        func Get(n int) (list []int) { // n 第几次request
+            for i := 0; i < n; i++ {
+                list = append(list, i)
+            }
+            return
+        }
+    `
+    [BODY]
+    `
+    func Get(n int) string {
+        return fmt.Sprintf("I'm number %d", n)
+    }
+    `
+    [COUNT] // 请求次数
+    10
+}
