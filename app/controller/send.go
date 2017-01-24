@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/wgyuuu/reqbot/common/dhttp"
@@ -14,12 +15,16 @@ func SendRequest(uri, method string, mapHeaders, mapParams map[string]string, bo
 
 	start := time.Now()
 	defer func() {
+		if err == nil {
+			return
+		}
+
 		fields := map[string]interface{}{
 			"url":    uri,
 			"method": method,
-			"timer":  time.Since(start) / time.Millisecond,
+			"timer":  time.Since(start),
 		}
-		dlog.NewEntry(fields).Debug2("params", mapParams, "body", body, "result", result)
+		dlog.NewEntry(fields).Info2("params", mapParams, "body", body, "result", result, "error", err)
 	}()
 
 	values := make(url.Values)
@@ -27,13 +32,10 @@ func SendRequest(uri, method string, mapHeaders, mapParams map[string]string, bo
 		values.Add(key, value)
 	}
 
-	switch method {
+	switch strings.ToUpper(method) {
 	case "POST":
 		result, err = dhttp.Post(uri, mapHeaders, values, body)
 	case "GET":
 		result, err = dhttp.Get(uri, mapHeaders, values)
-	}
-	if err != nil {
-		dlog.Error("url", uri, "error", err)
 	}
 }

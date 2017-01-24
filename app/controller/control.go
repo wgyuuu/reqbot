@@ -76,7 +76,7 @@ func startReq(any *analysis.AnalysisCNF) {
 	reqN, _ := strconv.Atoi(any.GetDefaultValue(analysis.Count, 0))
 
 	defer func() {
-		timer := time.Since(start) / time.Millisecond
+		timer := time.Since(start)
 		fields := map[string]interface{}{
 			"title": "total_req",
 			"timer": timer,
