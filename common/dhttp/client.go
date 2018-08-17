@@ -14,7 +14,7 @@ import (
 
 type Header map[string]string
 
-var cli = &http.Client{Timeout: time.Millisecond * 100}
+var cli = &http.Client{Timeout: 5 * time.Second}
 
 func Get(uri string, header Header, params url.Values) ([]byte, error) {
 	finalUrl := uri
