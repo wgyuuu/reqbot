@@ -75,13 +75,15 @@ func startReq(any *analysis.AnalysisCNF) {
 	start := time.Now()
 	reqN, _ := strconv.Atoi(any.GetDefaultValue(analysis.Count, 0))
 
+	mr := new(MultiReq)
+	useTime := time.Duration(0)
 	defer func() {
-		timer := time.Since(start)
+		testTimer := time.Since(start)
 		fields := map[string]interface{}{
-			"title": "total_req",
-			"timer": timer,
+			"title": "totalReq",
+			"测试时间":  testTimer,
 		}
-		dlog.NewEntry(fields).Info2("avg_timer", timer/time.Duration(reqN), "req_count", reqN)
+		dlog.NewEntry(fields).Info2("请求平均时间", useTime/time.Duration(reqN), "请求次数", reqN, "最大并发数", mr.Max())
 	}()
 
 	var reqGW sync.WaitGroup
@@ -95,9 +97,35 @@ func startReq(any *analysis.AnalysisCNF) {
 		reqGW.Add(1)
 		go util.SafeFunc(func() {
 			defer reqGW.Done()
-			SendRequest(url, method, mapHeaders, mapParams, body)
+			mr.Update(1)
+			defer mr.Update(-1)
+			duration := SendRequest(url, method, mapHeaders, mapParams, body)
+			useTime += duration
 		})
 	}
-
 	reqGW.Wait()
+}
+
+type MultiReq struct {
+	lock     sync.Mutex
+	count    int64
+	maxCount int64
+}
+
+func (mr *MultiReq) Update(n int64) {
+	mr.lock.Lock()
+	defer mr.lock.Unlock()
+	if n > 0 {
+		mr.count += n
+	} else {
+		// 在减的时候一般是最大值
+		if mr.count > mr.maxCount {
+			mr.maxCount = mr.count
+		}
+		mr.count += n
+	}
+}
+
+func (mr *MultiReq) Max() int64 {
+	return mr.maxCount
 }

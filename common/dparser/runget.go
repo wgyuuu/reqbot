@@ -34,7 +34,7 @@ func RunGet(src string, n int) string {
 	}
 	w.WriteString(fmt.Sprintf(`
 	var n *int = flag.Int("n", 0, "request count")
-	
+
 	func init() {
 		flag.Parse()
 	}
@@ -50,7 +50,7 @@ func RunGet(src string, n int) string {
     }
     %s`, src))
 	w.Flush()
-
+	// 这里应该先生成好可执行程序
 	cmd := exec.Command("go", "run", tmpFile.Name(), "-n", strconv.Itoa(n))
 	res, err := cmd.CombinedOutput()
 	if err != nil {
